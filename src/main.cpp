@@ -11,6 +11,8 @@
 #include "dual_sensor/DualPressureStamped.h"
 #include <ros/time.h>
 
+#define LOOP_TIME 80  // loop duration in ms
+
 LPS25HB sensor1, sensor2; // Create an object of the LPS25HB class
 
 // ros
@@ -18,6 +20,8 @@ ros::NodeHandle  nh;
 std_msgs::Float32 hoge;
 dual_sensor::DualPressureStamped pstamped;
 ros::Publisher pub_dualpressure("dpressures", &pstamped);
+
+unsigned long time;
 
 void setup()
 {
@@ -66,7 +70,9 @@ void common_procedure(LPS25HB& sensor, std_msgs::Float32& floatmsg){
 
 void loop()
 {
-    //see this for time: http://wiki.ros.org/rosserial_arduino/Tutorials/Time%20and%20TF
+
+    time = millis();
+
     pstamped.header.stamp = nh.now(); // different from roscpp!
     Serial.println("testing sensor1\n");
     common_procedure(sensor1, pstamped.pressure1);
@@ -74,6 +80,8 @@ void loop()
     Serial.println("testing sensor2\n");
     common_procedure(sensor2, pstamped.pressure2);
     pub_dualpressure.publish(&pstamped);
-    delay(100);
+
+    //delay(100);
+    while (millis() < time + LOOP_TIME); // enforce constant loop time
     nh.spinOnce();
 }
