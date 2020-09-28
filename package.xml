@@ -24,6 +24,7 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>rosserial_python</exec_depend>
+  <exec_depend>rosserial_arduino</exec_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
 
