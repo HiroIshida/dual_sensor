@@ -8,20 +8,22 @@
 #include <string.h>
 #include "std_msgs/String.h"
 #include "std_msgs/Float32.h"
+#include "dual_sensor/DualPressureStamped.h"
 
 LPS25HB sensor1, sensor2; // Create an object of the LPS25HB class
 
 // ros
 ros::NodeHandle  nh;
 std_msgs::Float32 hoge;
-ros::Publisher pub("chatter", &hoge);
+dual_sensor::DualPressureStamped pstamped;
+ros::Publisher pub_dualpressure("dpressures", &pstamped);
 
 void setup()
 {
 
   nh.getHardware()->setBaud(57600);
   nh.initNode();
-  nh.advertise(pub);
+  nh.advertise(pub_dualpressure);
 
   while(!nh.connected())
   {
@@ -38,7 +40,7 @@ void setup()
   sensor2.begin(Wire1, LPS25HB_I2C_ADDR_DEF); 
 }
 
-void common_procedure(LPS25HB& sensor){
+void common_procedure(LPS25HB& sensor, std_msgs::Float32& floatmsg){
   if (sensor.isConnected() == true)
   {
     if (sensor.getStatus() == 0x00)
@@ -50,6 +52,7 @@ void common_procedure(LPS25HB& sensor){
     Serial.print(", Pressure (hPa): ");
     Serial.print(sensor.getPressure_hPa()); // Get the pressure reading in hPa as determined by dividing the number of ADC counts by 4096 (according to the datasheet)
     hoge.data = sensor.getPressure_hPa();
+    floatmsg.data = sensor.getPressure_hPa();
     Serial.print(", Temperature (degC): ");
     Serial.println(sensor.getTemperature_degC()); // Get the temperature in degrees C by dividing the ADC count by 480
   }
@@ -63,11 +66,11 @@ void common_procedure(LPS25HB& sensor){
 void loop()
 {
     Serial.println("testing sensor1\n");
-    common_procedure(sensor1);
+    common_procedure(sensor1, pstamped.pressure1);
 
     Serial.println("testing sensor2\n");
-    common_procedure(sensor2);
-    pub.publish(&hoge);
+    common_procedure(sensor2, pstamped.pressure2);
+    pub_dualpressure.publish(&pstamped);
     delay(100);
     nh.spinOnce();
 }
