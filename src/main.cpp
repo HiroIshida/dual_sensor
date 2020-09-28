@@ -5,11 +5,27 @@
 #include <math.h>
 #include <ros.h>
 #include <array>
+#include "std_msgs/String.h"
 
 LPS25HB sensor1, sensor2; // Create an object of the LPS25HB class
 
+// ros
+ros::NodeHandle  nh;
+std_msgs::String hoge;
+ros::Publisher pub("chatter", &hoge);
+
 void setup()
 {
+
+  nh.getHardware()->setBaud(57600);
+  nh.initNode();
+  nh.advertise(pub);
+
+  while(!nh.connected())
+  {
+    nh.spinOnce();
+  }
+
   Serial.begin(9600);
   Serial.println("LPS25HB Pressure Sensor Example 3 - Checking the Connection");
   Serial.println();
@@ -48,5 +64,8 @@ void loop()
 
     Serial.println("testing sensor2\n");
     common_procedure(sensor1);
+    hoge.data = "unko";
+    pub.publish(&hoge);
     delay(100);
+    nh.spinOnce();
 }
