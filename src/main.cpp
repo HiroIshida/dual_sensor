@@ -5,13 +5,15 @@
 #include <math.h>
 #include <ros.h>
 #include <array>
+#include <string.h>
 #include "std_msgs/String.h"
+#include "std_msgs/Float32.h"
 
 LPS25HB sensor1, sensor2; // Create an object of the LPS25HB class
 
 // ros
 ros::NodeHandle  nh;
-std_msgs::String hoge;
+std_msgs::Float32 hoge;
 ros::Publisher pub("chatter", &hoge);
 
 void setup()
@@ -47,6 +49,7 @@ void common_procedure(LPS25HB& sensor){
     Serial.print(sensor.getStatus(), HEX); // Read the sensor status, the datasheet can explain what the various codes mean
     Serial.print(", Pressure (hPa): ");
     Serial.print(sensor.getPressure_hPa()); // Get the pressure reading in hPa as determined by dividing the number of ADC counts by 4096 (according to the datasheet)
+    hoge.data = sensor.getPressure_hPa();
     Serial.print(", Temperature (degC): ");
     Serial.println(sensor.getTemperature_degC()); // Get the temperature in degrees C by dividing the ADC count by 480
   }
@@ -63,8 +66,7 @@ void loop()
     common_procedure(sensor1);
 
     Serial.println("testing sensor2\n");
-    common_procedure(sensor1);
-    hoge.data = "unko";
+    common_procedure(sensor2);
     pub.publish(&hoge);
     delay(100);
     nh.spinOnce();
