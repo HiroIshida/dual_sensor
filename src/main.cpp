@@ -9,6 +9,7 @@
 #include "std_msgs/String.h"
 #include "std_msgs/Float32.h"
 #include "dual_sensor/DualPressureStamped.h"
+#include <ros/time.h>
 
 LPS25HB sensor1, sensor2; // Create an object of the LPS25HB class
 
@@ -65,6 +66,8 @@ void common_procedure(LPS25HB& sensor, std_msgs::Float32& floatmsg){
 
 void loop()
 {
+    //see this for time: http://wiki.ros.org/rosserial_arduino/Tutorials/Time%20and%20TF
+    pstamped.header.stamp = nh.now(); // different from roscpp!
     Serial.println("testing sensor1\n");
     common_procedure(sensor1, pstamped.pressure1);
 
